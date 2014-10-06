@@ -53,10 +53,14 @@ class Promise implements ExtendedPromiseInterface
         }
     }
 
-    public function otherwise(callable $onRejected)
+    public function otherwise($classNameOrOnRejected, callable $onRejected = null)
     {
-        return $this->then(null, function ($reason) use ($onRejected) {
-            if (!_checkTypehint($onRejected, $reason)) {
+        if (null === $onRejected) {
+            return $this->then(null, $classNameOrOnRejected);
+        }
+
+        return $this->then(null, function ($reason) use ($classNameOrOnRejected, $onRejected) {
+            if (!$reason instanceof $classNameOrOnRejected) {
                 return new RejectedPromise($reason);
             }
 

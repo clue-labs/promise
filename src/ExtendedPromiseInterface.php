@@ -12,7 +12,7 @@ interface ExtendedPromiseInterface extends PromiseInterface
     /**
      * @return ExtendedPromiseInterface
      */
-    public function otherwise(callable $onRejected);
+    public function otherwise($classNameOrOnRejected, callable $onRejected = null);
 
     /**
      * @return ExtendedPromiseInterface
