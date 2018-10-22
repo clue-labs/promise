@@ -14,22 +14,54 @@ class LazyPromise implements ExtendedPromiseInterface, CancellablePromiseInterfa
 
     public function then(callable $onFulfilled = null, callable $onRejected = null, callable $onProgress = null)
     {
-        return $this->promise()->then($onFulfilled, $onRejected, $onProgress);
+        // Explicitly overwrite arguments with null values before invoking
+        // resolver function. This ensure that these arguments do not show up
+        // in the stack trace in PHP 7+ only.
+        $cbFulfilled = $onFulfilled;
+        $cbRejected = $onRejected;
+        $cbProgress = $onProgress;
+        $onFulfilled = _describeType($onFulfilled);
+        $onRejected = _describeType($onRejected);
+        $onProgress = _describeType($onProgress);
+
+        return $this->promise()->then($cbFulfilled, $cbRejected, $cbProgress);
     }
 
     public function done(callable $onFulfilled = null, callable $onRejected = null, callable $onProgress = null)
     {
-        return $this->promise()->done($onFulfilled, $onRejected, $onProgress);
+        // Explicitly overwrite arguments with null values before invoking
+        // resolver function. This ensure that these arguments do not show up
+        // in the stack trace in PHP 7+ only.
+        $cbFulfilled = $onFulfilled;
+        $cbRejected = $onRejected;
+        $cbProgress = $onProgress;
+        $onFulfilled = _describeType($onFulfilled);
+        $onRejected = _describeType($onRejected);
+        $onProgress = _describeType($onProgress);
+
+        return $this->promise()->done($cbFulfilled, $cbRejected, $cbProgress);
     }
 
     public function otherwise(callable $onRejected)
     {
-        return $this->promise()->otherwise($onRejected);
+        // Explicitly overwrite arguments with null values before invoking
+        // resolver function. This ensure that these arguments do not show up
+        // in the stack trace in PHP 7+ only.
+        $cb = $onRejected;
+        $onRejected = _describeType($onRejected);
+
+        return $this->promise()->otherwise($cb);
     }
 
     public function always(callable $onFulfilledOrRejected)
     {
-        return $this->promise()->always($onFulfilledOrRejected);
+        // Explicitly overwrite arguments with null values before invoking
+        // resolver function. This ensure that these arguments do not show up
+        // in the stack trace in PHP 7+ only.
+        $cb = $onFulfilledOrRejected;
+        $onFulfilledOrRejected = _describeType($onFulfilledOrRejected);
+
+        return $this->promise()->always($cb);
     }
 
     public function progress(callable $onProgress)

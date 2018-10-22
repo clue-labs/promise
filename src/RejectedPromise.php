@@ -22,7 +22,15 @@ class RejectedPromise implements ExtendedPromiseInterface, CancellablePromiseInt
         }
 
         try {
-            return resolve($onRejected($this->reason));
+            // Explicitly overwrite arguments with null values before invoking
+            // resolver function. This ensure that these arguments do not show up
+            // in the stack trace in PHP 7+ only.
+            $cb = $onRejected;
+            $onFulfilled = _describeType($onFulfilled);
+            $onRejected = _describeType($onRejected);
+            $onProgress = _describeType($onProgress);
+
+            return resolve($cb($this->reason));
         } catch (\Throwable $exception) {
             return new RejectedPromise($exception);
         } catch (\Exception $exception) {
@@ -32,11 +40,19 @@ class RejectedPromise implements ExtendedPromiseInterface, CancellablePromiseInt
 
     public function done(callable $onFulfilled = null, callable $onRejected = null, callable $onProgress = null)
     {
-        if (null === $onRejected) {
+        // Explicitly overwrite arguments with null values before invoking
+        // resolver function. This ensure that these arguments do not show up
+        // in the stack trace in PHP 7+ only.
+        $cb = $onRejected;
+        $onFulfilled = _describeType($onFulfilled);
+        $onRejected = _describeType($onRejected);
+        $onProgress = _describeType($onProgress);
+
+        if (null === $cb) {
             throw UnhandledRejectionException::resolve($this->reason);
         }
 
-        $result = $onRejected($this->reason);
+        $result = $cb($this->reason);
 
         if ($result instanceof self) {
             throw UnhandledRejectionException::resolve($result->reason);
@@ -53,13 +69,25 @@ class RejectedPromise implements ExtendedPromiseInterface, CancellablePromiseInt
             return $this;
         }
 
-        return $this->then(null, $onRejected);
+        // Explicitly overwrite arguments with null values before invoking
+        // resolver function. This ensure that these arguments do not show up
+        // in the stack trace in PHP 7+ only.
+        $cb = $onRejected;
+        $onRejected = null;
+
+        return $this->then(null, $cb);
     }
 
     public function always(callable $onFulfilledOrRejected)
     {
-        return $this->then(null, function ($reason) use ($onFulfilledOrRejected) {
-            return resolve($onFulfilledOrRejected())->then(function () use ($reason) {
+        // Explicitly overwrite arguments with null values before invoking
+        // resolver function. This ensure that these arguments do not show up
+        // in the stack trace in PHP 7+ only.
+        $cb = $onFulfilledOrRejected;
+        $onFulfilledOrRejected = null;
+
+        return $this->then(null, function ($reason) use ($cb) {
+            return resolve($cb())->then(function () use ($reason) {
                 return new RejectedPromise($reason);
             });
         });

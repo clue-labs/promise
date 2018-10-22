@@ -242,3 +242,8 @@ function _checkTypehint(callable $callback, $object)
 
     return $expectedException->getClass()->isInstance($object);
 }
+
+function _describeType($type)
+{
+    return (is_object($type) ? 'Object(' . get_class($type) . ')' : $type);
+}

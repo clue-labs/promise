@@ -22,7 +22,15 @@ class FulfilledPromise implements ExtendedPromiseInterface, CancellablePromiseIn
         }
 
         try {
-            return resolve($onFulfilled($this->value));
+            // Explicitly overwrite arguments with null values before invoking
+            // resolver function. This ensure that these arguments do not show up
+            // in the stack trace in PHP 7+ only.
+            $cb = $onFulfilled;
+            $onFulfilled = _describeType($onFulfilled);
+            $onRejected = _describeType($onRejected);
+            $onProgress = _describeType($onProgress);
+
+            return resolve($cb($this->value));
         } catch (\Throwable $exception) {
             return new RejectedPromise($exception);
         } catch (\Exception $exception) {
@@ -36,7 +44,15 @@ class FulfilledPromise implements ExtendedPromiseInterface, CancellablePromiseIn
             return;
         }
 
-        $result = $onFulfilled($this->value);
+        // Explicitly overwrite arguments with null values before invoking
+        // resolver function. This ensure that these arguments do not show up
+        // in the stack trace in PHP 7+ only.
+        $cb = $onFulfilled;
+        $onFulfilled = _describeType($onFulfilled);
+        $onRejected = _describeType($onRejected);
+        $onProgress = _describeType($onProgress);
+
+        $result = $cb($this->value);
 
         if ($result instanceof ExtendedPromiseInterface) {
             $result->done();
@@ -50,8 +66,14 @@ class FulfilledPromise implements ExtendedPromiseInterface, CancellablePromiseIn
 
     public function always(callable $onFulfilledOrRejected)
     {
-        return $this->then(function ($value) use ($onFulfilledOrRejected) {
-            return resolve($onFulfilledOrRejected())->then(function () use ($value) {
+        // Explicitly overwrite arguments with null values before invoking
+        // resolver function. This ensure that these arguments do not show up
+        // in the stack trace in PHP 7+ only.
+        $cb = $onFulfilledOrRejected;
+        $onFulfilledOrRejected = _describeType($onFulfilledOrRejected);
+
+        return $this->then(function ($value) use ($cb) {
+            return resolve($cb())->then(function () use ($value) {
                 return $value;
             });
         });

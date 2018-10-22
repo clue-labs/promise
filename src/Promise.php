@@ -21,14 +21,25 @@ class Promise implements ExtendedPromiseInterface, CancellablePromiseInterface
         // resolver function. This ensure that these arguments do not show up
         // in the stack trace in PHP 7+ only.
         $cb = $resolver;
-        $resolver = $canceller = null;
+        $resolver = _describeType($resolver);
+        $canceller = _describeType($canceller);
         $this->call($cb);
     }
 
     public function then(callable $onFulfilled = null, callable $onRejected = null, callable $onProgress = null)
     {
         if (null !== $this->result) {
-            return $this->result->then($onFulfilled, $onRejected, $onProgress);
+            // Explicitly overwrite arguments with null values before invoking
+            // resolver function. This ensure that these arguments do not show up
+            // in the stack trace in PHP 7+ only.
+            $cbFulfilled = $onFulfilled;
+            $cbRejected = $onRejected;
+            $cbProgress = $onProgress;
+            $onFulfilled = _describeType($onFulfilled);
+            $onRejected = _describeType($onRejected);
+            $onProgress = _describeType($onProgress);
+
+            return $this->result->then($cbFulfilled, $cbRejected, $cbProgress);
         }
 
         if (null === $this->canceller) {
@@ -58,7 +69,17 @@ class Promise implements ExtendedPromiseInterface, CancellablePromiseInterface
     public function done(callable $onFulfilled = null, callable $onRejected = null, callable $onProgress = null)
     {
         if (null !== $this->result) {
-            return $this->result->done($onFulfilled, $onRejected, $onProgress);
+            // Explicitly overwrite arguments with null values before invoking
+            // resolver function. This ensure that these arguments do not show up
+            // in the stack trace in PHP 7+ only.
+            $cbFulfilled = $onFulfilled;
+            $cbRejected = $onRejected;
+            $cbProgress = $onProgress;
+            $onFulfilled = _describeType($onFulfilled);
+            $onRejected = _describeType($onRejected);
+            $onProgress = _describeType($onProgress);
+
+            return $this->result->done($cbFulfilled, $cbRejected, $cbProgress);
         }
 
         $this->handlers[] = static function (ExtendedPromiseInterface $promise) use ($onFulfilled, $onRejected) {
@@ -73,23 +94,35 @@ class Promise implements ExtendedPromiseInterface, CancellablePromiseInterface
 
     public function otherwise(callable $onRejected)
     {
-        return $this->then(null, static function ($reason) use ($onRejected) {
-            if (!_checkTypehint($onRejected, $reason)) {
+        // Explicitly overwrite arguments with null values before invoking
+        // resolver function. This ensure that these arguments do not show up
+        // in the stack trace in PHP 7+ only.
+        $cb = $onRejected;
+        $onRejected = _describeType($onRejected);
+
+        return $this->then(null, static function ($reason) use ($cb) {
+            if (!_checkTypehint($cb, $reason)) {
                 return new RejectedPromise($reason);
             }
 
-            return $onRejected($reason);
+            return $cb($reason);
         });
     }
 
     public function always(callable $onFulfilledOrRejected)
     {
-        return $this->then(static function ($value) use ($onFulfilledOrRejected) {
-            return resolve($onFulfilledOrRejected())->then(function () use ($value) {
+        // Explicitly overwrite arguments with null values before invoking
+        // resolver function. This ensure that these arguments do not show up
+        // in the stack trace in PHP 7+ only.
+        $cb = $onFulfilledOrRejected;
+        $onFulfilledOrRejected = _describeType($onFulfilledOrRejected);
+
+        return $this->then(static function ($value) use ($cb) {
+            return resolve($cb())->then(function () use ($value) {
                 return $value;
             });
-        }, static function ($reason) use ($onFulfilledOrRejected) {
-            return resolve($onFulfilledOrRejected())->then(function () use ($reason) {
+        }, static function ($reason) use ($cb) {
+            return resolve($cb())->then(function () use ($reason) {
                 return new RejectedPromise($reason);
             });
         });
@@ -97,7 +130,13 @@ class Promise implements ExtendedPromiseInterface, CancellablePromiseInterface
 
     public function progress(callable $onProgress)
     {
-        return $this->then(null, null, $onProgress);
+        // Explicitly overwrite arguments with null values before invoking
+        // resolver function. This ensure that these arguments do not show up
+        // in the stack trace in PHP 7+ only.
+        $cb = $onProgress;
+        $onProgress = _describeType($onProgress);
+
+        return $this->then(null, null, $cb);
     }
 
     public function cancel()
@@ -194,7 +233,7 @@ class Promise implements ExtendedPromiseInterface, CancellablePromiseInterface
         // Explicitly overwrite argument with null value. This ensure that this
         // argument does not show up in the stack trace in PHP 7+ only.
         $callback = $cb;
-        $cb = null;
+        $cb = _describeType($cb);
 
         // Use reflection to inspect number of arguments expected by this callback.
         // We did some careful benchmarking here: Using reflection to avoid unneeded
