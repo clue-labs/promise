@@ -197,6 +197,8 @@ trait PromiseRejectedTestTrait
 
         $adapter->reject(1);
         $this->assertNull($adapter->promise()->done(null, $mock));
+
+        $adapter->promise()->then(null, function () { });
     }
 
     /** @test */
@@ -251,7 +253,11 @@ trait PromiseRejectedTestTrait
 
         $adapter->reject(1);
         $this->assertNull($adapter->promise()->done(null, function () {
-            return \React\Promise\reject();
+            $reject = \React\Promise\reject();
+
+            $reject->then(null, function () { });
+
+            return $reject;
         }));
     }
 
@@ -264,7 +270,11 @@ trait PromiseRejectedTestTrait
 
         $adapter->reject(1);
         $this->assertNull($adapter->promise()->done(null, function () {
-            return \React\Promise\reject(new \Exception('UnhandledRejectionException'));
+            $reject = \React\Promise\reject(new \Exception('UnhandledRejectionException'));
+
+            $reject->then(null, function () { });
+
+            return $reject;
         }));
     }
 
@@ -379,10 +389,13 @@ trait PromiseRejectedTestTrait
         $mock = $this->expectCallableNever();
 
         $adapter->reject($exception);
-        $adapter->promise()
+        $ret = $adapter->promise()
             ->otherwise(function (\InvalidArgumentException $reason) use ($mock) {
                 $mock($reason);
             });
+
+        $ret->then(null, function () { });
+        $adapter->promise()->then(null, function () { });
     }
 
     /** @test */
@@ -498,6 +511,8 @@ trait PromiseRejectedTestTrait
         $adapter->reject();
 
         $this->assertNull($adapter->promise()->cancel());
+
+        $adapter->promise()->then(null, function () { });
     }
 
     /** @test */
@@ -508,5 +523,7 @@ trait PromiseRejectedTestTrait
         $adapter->reject();
 
         $adapter->promise()->cancel();
+
+        $adapter->promise()->then(null, function () { });
     }
 }

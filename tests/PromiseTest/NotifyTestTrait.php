@@ -279,6 +279,8 @@ trait NotifyTestTrait
 
         $adapter->notify(1);
         $adapter->reject(2);
+
+        $adapter->promise()->then(null, function () { });
     }
 
     /** @test */
@@ -289,6 +291,8 @@ trait NotifyTestTrait
         $adapter->reject(1);
 
         $this->assertNull($adapter->notify());
+
+        $adapter->promise()->then(null, function () { });
     }
 
     /** @test */

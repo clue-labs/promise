@@ -206,6 +206,6 @@ class FunctionRaceTest extends TestCase
             ->expects($this->never())
             ->method('cancel');
 
-        race([$deferred->promise(), $mock2])->cancel();
+        race([$deferred->promise(), $mock2])->then(null, function () { })->cancel();
     }
 }

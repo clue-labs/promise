@@ -176,7 +176,11 @@ trait RejectTestTrait
         $this->setExpectedException('React\\Promise\\UnhandledRejectionException');
 
         $this->assertNull($adapter->promise()->done(null, function () {
-            return \React\Promise\reject();
+            $reject = \React\Promise\reject();
+
+            $reject->then(null, function () { });
+
+            return $reject;
         }));
         $adapter->reject(1);
     }
@@ -189,7 +193,11 @@ trait RejectTestTrait
         $this->setExpectedException('\Exception', 'UnhandledRejectionException');
 
         $this->assertNull($adapter->promise()->done(null, function () {
-            return \React\Promise\reject(new \Exception('UnhandledRejectionException'));
+            $reject = \React\Promise\reject(new \Exception('UnhandledRejectionException'));
+
+            $reject->then(null, function () { });
+
+            return $reject;
         }));
         $adapter->reject(1);
     }

@@ -67,6 +67,7 @@ class PromiseTest extends TestCase
         $promise = new Promise(function () {
             throw new \Exception('foo');
         });
+        $promise->then(null, function () { });
         unset($promise);
 
         $this->assertSame(0, gc_collect_cycles());
@@ -79,6 +80,7 @@ class PromiseTest extends TestCase
         $promise = new Promise(function ($resolve, $reject) {
             $reject(new \Exception('foo'));
         });
+        $promise->then(null, function () { });
         unset($promise);
 
         $this->assertSame(0, gc_collect_cycles());
@@ -91,6 +93,7 @@ class PromiseTest extends TestCase
         $promise = new Promise(function ($resolve, $reject) { }, function ($resolve, $reject) {
             $reject(new \Exception('foo'));
         });
+        $promise->then(null, function () { });
         $promise->cancel();
         unset($promise);
 
@@ -104,7 +107,7 @@ class PromiseTest extends TestCase
         $promise = new Promise(function ($resolve, $reject) { }, function ($resolve, $reject) {
             $reject(new \Exception('foo'));
         });
-        $promise->then()->then()->then()->cancel();
+        $promise->then()->then()->then(null, function () { })->cancel();
         unset($promise);
 
         $this->assertSame(0, gc_collect_cycles());
@@ -117,6 +120,7 @@ class PromiseTest extends TestCase
         $promise = new Promise(function ($resolve, $reject) {
             throw new \Exception('foo');
         });
+        $promise->then(null, function () { });
         unset($promise);
 
         $this->assertSame(0, gc_collect_cycles());
@@ -142,6 +146,7 @@ class PromiseTest extends TestCase
             throw new \Exception('foo');
         });
         $promise->cancel();
+        $promise->then(null, function () { });
         unset($promise);
 
         $this->assertSame(0, gc_collect_cycles());
@@ -158,6 +163,7 @@ class PromiseTest extends TestCase
         $promise = new Promise(function () use (&$promise) {
             throw new \Exception('foo');
         });
+        $promise->then(null, function () { });
         unset($promise);
 
         $this->assertSame(0, gc_collect_cycles());
@@ -174,6 +180,7 @@ class PromiseTest extends TestCase
         $promise = new Promise(function () {
             throw new \Exception('foo');
         }, function () use (&$promise) { });
+        $promise->then(null, function () { });
         unset($promise);
 
         $this->assertSame(0, gc_collect_cycles());
@@ -187,7 +194,7 @@ class PromiseTest extends TestCase
             $notify(42);
         });
 
-        $promise->then(null, null, $this->expectCallableNever());
+        $promise->then(null, function () { }, $this->expectCallableNever());
         $promise->cancel();
     }
 

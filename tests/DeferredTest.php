@@ -47,6 +47,7 @@ class DeferredTest extends TestCase
         $deferred = new Deferred(function ($resolve, $reject) {
             $reject(new \Exception('foo'));
         });
+        $deferred->promise()->then(null, function () { });
         $deferred->promise()->cancel();
         unset($deferred);
 
@@ -60,7 +61,7 @@ class DeferredTest extends TestCase
         $deferred = new Deferred(function ($resolve, $reject) {
             $reject(new \Exception('foo'));
         });
-        $deferred->promise()->then()->cancel();
+        $deferred->promise()->then(null, function () { })->cancel();
         unset($deferred);
 
         $this->assertSame(0, gc_collect_cycles());
@@ -72,6 +73,7 @@ class DeferredTest extends TestCase
         gc_collect_cycles();
         $deferred = new Deferred(function () use (&$deferred) { });
         $deferred->reject(new \Exception('foo'));
+        $deferred->promise()->then(null, function () { });
         unset($deferred);
 
         $this->assertSame(0, gc_collect_cycles());

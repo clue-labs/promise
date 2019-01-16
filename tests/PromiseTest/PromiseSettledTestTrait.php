@@ -16,6 +16,8 @@ trait PromiseSettledTestTrait
 
         $adapter->settle();
         $this->assertInstanceOf('React\\Promise\\PromiseInterface', $adapter->promise()->then());
+
+        $adapter->promise()->then(null, function () { });
     }
 
     /** @test */
@@ -25,6 +27,8 @@ trait PromiseSettledTestTrait
 
         $adapter->settle();
         $this->assertInstanceOf('React\\Promise\\PromiseInterface', $adapter->promise()->then(null, null, null));
+
+        $adapter->promise()->then(null, function () { });
     }
 
     /** @test */
@@ -35,6 +39,8 @@ trait PromiseSettledTestTrait
         $adapter->settle();
 
         $this->assertNull($adapter->promise()->cancel());
+
+        $adapter->promise()->then(null, function () { });
     }
 
     /** @test */
@@ -45,6 +51,8 @@ trait PromiseSettledTestTrait
         $adapter->settle();
 
         $adapter->promise()->cancel();
+
+        $adapter->promise()->then(null, function () { });
     }
 
     /** @test */
@@ -73,6 +81,8 @@ trait PromiseSettledTestTrait
         $adapter->settle();
         $adapter->promise()->progress($this->expectCallableNever());
         $adapter->notify();
+
+        $adapter->promise()->then(null, function () { });
     }
 
     /** @test */
@@ -81,6 +91,8 @@ trait PromiseSettledTestTrait
         $adapter = $this->getPromiseTestAdapter();
 
         $adapter->settle();
-        $this->assertInstanceOf('React\\Promise\\PromiseInterface', $adapter->promise()->always(function () {}));
+        $this->assertInstanceOf('React\\Promise\\PromiseInterface', $ret = $adapter->promise()->always(function () {}));
+
+        $ret->then(null, function () { });
     }
 }

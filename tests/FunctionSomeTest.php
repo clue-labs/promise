@@ -253,6 +253,8 @@ class FunctionSomeTest extends TestCase
             ->expects($this->never())
             ->method('cancel');
 
-        some([$deferred->promise(), $mock2], 2);
+        $ret = some([$deferred->promise(), $mock2], 2);
+
+        $ret->then(null, function () { });
     }
 }
